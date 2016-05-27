@@ -4,7 +4,7 @@ var URL = require('url-parse');
 
 var START_URL = "http://www.reddit.com";
 var SEARCH_WORD = "";
-var MAX_PAGES_TO_VISIT = 10;
+var MAX_PAGES_TO_VISIT = 1;
 
 var pagesVisited = {};
 var numPagesVisited = 0;
@@ -45,12 +45,9 @@ function visitPage(url, callback) {
   // Make the request
   console.log("Visiting page " + options.url);
 
-
-
   request(options, function(error, response, body) {
      // Check status code (200 is HTTP OK)
      console.log("Status code: " + response.statusCode);
-     console.log(body);
      if(response.statusCode !== 200) {
        callback();
        return;
@@ -60,12 +57,10 @@ function visitPage(url, callback) {
      var isWordFound = searchForWord($, SEARCH_WORD);
      if(isWordFound) {
        console.log('Word ' + SEARCH_WORD + ' found at page ' + url);
-     } else {
-       collectInternalLinks($);
-       iterateTables($);
+     } 
+      collectMainPageLinks($);
        // In this short program, our callback is just calling crawl()
-       callback();
-     }
+      callback();
   });
 }
 
@@ -82,10 +77,13 @@ function iterateTables($) {
 	});
 }
 
-function collectInternalLinks($) {
-    var relativeLinks = $("a[href^='/']");
-    console.log("Found " + relativeLinks.length + " relative links on page");
-    relativeLinks.each(function() {
-        pagesToVisit.push(baseUrl + $(this).attr('href'));
-    });
+function collectMainPageLinks($) {
+	var titleLinks = $('.title');
+	titleLinks.each(function() {
+		console.log($(this).attr('href'));;
+	});
+	var commentLinks = $('.comments');
+	commentLinks.each(function() {
+		console.log($(this).attr('href'));
+	});
 }
